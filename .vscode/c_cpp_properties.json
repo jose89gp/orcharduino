@@ -8,15 +8,17 @@
             "includePath": [
                 "C:/Users/Jose/.platformio/packages/framework-arduinoavr/cores/arduino",
                 "C:/Users/Jose/.platformio/packages/framework-arduinoavr/variants/standard",
+                "c:/Users/Jose/Google Drive/Code/arduino/orcharduino/lib/HC-SR04",
                 "C:/Users/Jose/.platformio/lib/Bifrost library for HC-SR04_ID2019/src",
+                "C:/Users/Jose/.platformio/lib/HC-SR04",
                 "C:/Users/Jose/.platformio/packages/framework-arduinoavr/libraries/__cores__/arduino/EEPROM/src",
                 "C:/Users/Jose/.platformio/packages/framework-arduinoavr/libraries/__cores__/arduino/HID/src",
                 "C:/Users/Jose/.platformio/packages/framework-arduinoavr/libraries/__cores__/arduino/SPI/src",
                 "C:/Users/Jose/.platformio/packages/framework-arduinoavr/libraries/__cores__/arduino/SoftwareSerial/src",
                 "C:/Users/Jose/.platformio/packages/framework-arduinoavr/libraries/__cores__/arduino/Wire/src",
                 "C:/Users/Jose/.platformio/packages/tool-unity",
-                "C:/Users/Jose/Google Drive/Code/arduino/orcharduino/include",
-                "C:/Users/Jose/Google Drive/Code/arduino/orcharduino/src",
+                "c:/Users/Jose/Google Drive/Code/arduino/orcharduino/include",
+                "c:/Users/Jose/Google Drive/Code/arduino/orcharduino/src",
                 ""
             ],
             "browse": {
@@ -25,15 +27,17 @@
                 "path": [
                     "C:/Users/Jose/.platformio/packages/framework-arduinoavr/cores/arduino",
                     "C:/Users/Jose/.platformio/packages/framework-arduinoavr/variants/standard",
+                    "c:/Users/Jose/Google Drive/Code/arduino/orcharduino/lib/HC-SR04",
                     "C:/Users/Jose/.platformio/lib/Bifrost library for HC-SR04_ID2019/src",
+                    "C:/Users/Jose/.platformio/lib/HC-SR04",
                     "C:/Users/Jose/.platformio/packages/framework-arduinoavr/libraries/__cores__/arduino/EEPROM/src",
                     "C:/Users/Jose/.platformio/packages/framework-arduinoavr/libraries/__cores__/arduino/HID/src",
                     "C:/Users/Jose/.platformio/packages/framework-arduinoavr/libraries/__cores__/arduino/SPI/src",
                     "C:/Users/Jose/.platformio/packages/framework-arduinoavr/libraries/__cores__/arduino/SoftwareSerial/src",
                     "C:/Users/Jose/.platformio/packages/framework-arduinoavr/libraries/__cores__/arduino/Wire/src",
                     "C:/Users/Jose/.platformio/packages/tool-unity",
-                    "C:/Users/Jose/Google Drive/Code/arduino/orcharduino/include",
-                    "C:/Users/Jose/Google Drive/Code/arduino/orcharduino/src",
+                    "c:/Users/Jose/Google Drive/Code/arduino/orcharduino/include",
+                    "c:/Users/Jose/Google Drive/Code/arduino/orcharduino/src",
                     ""
                 ]
             },
