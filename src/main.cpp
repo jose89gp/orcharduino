@@ -3,6 +3,7 @@
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
 #include <DHT_U.h>
+#include <LiquidCrystal.h>
 
 #define TRIG_PIN 13
 #define ECHO_PIN 12
@@ -10,8 +11,12 @@
 #define DHTTYPE    DHT11 
 SR04 sr04 = SR04(ECHO_PIN,TRIG_PIN);
 long a;
+long humidity;
+long temperature;
 DHT_Unified dht(DHTPIN, DHTTYPE);
 uint32_t delayMS = 2000;
+// initialize the library with the numbers of the interface pins
+LiquidCrystal lcd(6,7,8,9,10,11);
 
 
 void setup() {
@@ -22,6 +27,10 @@ void setup() {
    dht.temperature().getSensor(&sensor);
    // Print humidity sensor details.
    dht.humidity().getSensor(&sensor);
+   // set up the LCD's number of columns and rows:
+   lcd.begin(16, 2);
+   // Print a message to the LCD.
+   lcd.print("Initialiting...");
 }
 
 void loop() {
@@ -38,7 +47,8 @@ void loop() {
    }
    else {
     Serial.print(F("Temperature: "));
-    Serial.print(event.temperature);
+    temperature = event.temperature;
+    Serial.print(temperature);
     Serial.println(F("°C"));
    }
    // Get humidity event and print its value.
@@ -48,7 +58,26 @@ void loop() {
   }
   else {
     Serial.print(F("Humidity: "));
-    Serial.print(event.relative_humidity);
+    humidity = event.relative_humidity;
+    Serial.print(humidity);
     Serial.println(F("%"));
   }
+ 
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("T=");
+  lcd.print(temperature);
+  lcd.print(F(" C"));
+
+  lcd.print("   ");
+
+  lcd.print("H=");
+  lcd.print(temperature);
+  lcd.print(F(" %"));
+
+  lcd.setCursor(0,1); 
+  lcd.print("D=");
+  lcd.print(a);
+  lcd.print("cm");
+  
 }
