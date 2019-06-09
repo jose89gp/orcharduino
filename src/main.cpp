@@ -5,13 +5,18 @@
 #include <DHT_U.h>
 #include <LiquidCrystal.h>
 
-#define TRIG_PIN 13
-#define ECHO_PIN 12
+#define TRIG_PIN 5
+#define ECHO_PIN 4
 #define DHTPIN 2
 #define DHTTYPE DHT11
-#define RED 3
-#define GREEN 5
-#define BLUE 6
+#define SOILRELE 1
+#define PUMPRELE 3
+#define SOILSENSOR 0
+
+//Variable timer depending on dry level
+int long_timer = 60*30;
+int short_timer = 2;
+int timer = 5000;
 
 //Distance sensor variable initializing
 SR04 sr04 = SR04(ECHO_PIN, TRIG_PIN);
@@ -20,26 +25,27 @@ float wtank_volume;
 float wtank_radius = 0.2;
 float wtank_height = 0.3;
 float wtank_maxvolume = wtank_height * PI * wtank_radius * wtank_radius * 1000;
+float wtank_minvol = 1;
 
 //Temp&Hum sensor variable initializing
 long humidity;
 long temperature;
 DHT_Unified dht(DHTPIN, DHTTYPE);
-uint32_t delayMS = 500;
 
 // LCD variable initializing
-LiquidCrystal lcd(0, 7, 8, 9, 10, 11);
+LiquidCrystal lcd(7, 8, 9, 10, 11, 12);
+
+//Soil moisture sensor variable initializing
+int drysoillimit = 50;
+float soilmoisturelevel = 1024;
 
 void setup()
 {
-  pinMode(RED, OUTPUT);
-  pinMode(GREEN, OUTPUT);
-  pinMode(BLUE, OUTPUT);
-
-  digitalWrite(RED, LOW);
-  digitalWrite(GREEN, HIGH);
-  digitalWrite(BLUE, HIGH);
-
+  pinMode(SOILRELE, OUTPUT);
+  pinMode(PUMPRELE, OUTPUT);
+  digitalWrite(SOILRELE, HIGH);
+  digitalWrite(PUMPRELE, HIGH);
+  
   //Serial.begin(9600);
   dht.begin();
   // Print temperature sensor details.
@@ -52,57 +58,15 @@ void setup()
   // Print a message to the LCD.
   lcd.print("Initialiting...");
 }
-
-void loop()
-{
-  measWaterLevel();
-  measTempHumid();
-  delay(delayMS);
-
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("T=");
-  lcd.print(temperature);
-  lcd.print(F(" C"));
-
-  lcd.print("   ");
-
-  lcd.print("H=");
-  lcd.print(temperature);
-  lcd.print(F(" %"));
-
-  lcd.setCursor(0, 1);
-  lcd.print("D=");
-  lcd.print(wtank_distance);
-  lcd.print("cm");
-
-  lcd.print("   ");
-  lcd.print(analogRead(0));
-  if (analogRead(0) > 700)
-  {
-    analogWrite(RED, 255);
-    analogWrite(GREEN, 0);
-    analogWrite(BLUE, 0);
-  }
-  if (analogRead(0) < 700)
-  {
-    analogWrite(RED, 0);
-    analogWrite(GREEN, 255);
-    analogWrite(BLUE, 0); /* code */
-  }
-}
-
 void measWaterLevel()
 {
+  delay(200);
   //Get distance measure from sensor
   wtank_distance = sr04.Distance();
-  Serial.print(wtank_distance);
-  Serial.println("cm");
 
   //Transform distance to remaining litres
   wtank_volume = wtank_maxvolume - (PI * wtank_radius * wtank_radius * wtank_distance);
-  Serial.print("Remaining water: ");
-  Serial.println(wtank_volume);
+
 }
 
 void measTempHumid()
@@ -132,5 +96,77 @@ void measTempHumid()
     humidity = event.relative_humidity;
     Serial.print(humidity);
     Serial.println(F("%"));
+  }
+}
+
+void lcdUpdate()
+{
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("T=");
+  lcd.print(temperature);
+  lcd.print(F(" C"));
+
+  lcd.print("   ");
+
+  lcd.print("H=");
+  lcd.print(temperature);
+  lcd.print(F("%"));
+
+  lcd.setCursor(0, 1);
+  lcd.print("V=");
+  lcd.print(wtank_distance);
+  lcd.print("L");
+
+  lcd.print("  S=");
+  lcd.print(soilmoisturelevel);
+  lcd.print("%");
+}
+
+void measSoilMoisture()
+{
+  digitalWrite(SOILRELE, LOW);
+  delay(200);
+  soilmoisturelevel = analogRead(SOILSENSOR);
+  soilmoisturelevel = abs(((((soilmoisturelevel-112)/850))-1)*100);
+  digitalWrite(SOILRELE, HIGH);
+}
+
+void loop()
+{
+  //Start measure loop
+  measWaterLevel();
+  measTempHumid();
+  measSoilMoisture();
+
+  //If soil is wet
+  if (soilmoisturelevel >= drysoillimit)
+  {
+    //Switch off water pump
+    digitalWrite(PUMPRELE, HIGH);
+    //Set timer to long period between measurements
+    timer = long_timer;
+  }
+
+  //If soil is dry
+  else if (soilmoisturelevel < drysoillimit)
+  { 
+    //Check if water is available in tank before activating pump
+    if (wtank_volume > wtank_minvol)
+    {
+      //Switch on water pump
+      digitalWrite(PUMPRELE, LOW);
+      //Set timer to short period between measurements
+      timer = short_timer;
+    }
+  }
+
+  //Update LCD with new data
+  lcdUpdate();
+
+  //Wait for new measurement
+  for (size_t i = 0; i < timer; i++)
+  {
+    delay(1000);
   }
 }
