@@ -16,16 +16,16 @@
 //Variable timer depending on dry level
 int long_timer = 60*30;
 int short_timer = 2;
-int timer = 5000;
+int timer = 2;
 
 //Distance sensor variable initializing
 SR04 sr04 = SR04(ECHO_PIN, TRIG_PIN);
 long wtank_distance;
 float wtank_volume;
-float wtank_radius = 0.2;
-float wtank_height = 0.3;
+float wtank_radius = 0.125;
+float wtank_height = 0.17;
 float wtank_maxvolume = wtank_height * PI * wtank_radius * wtank_radius * 1000;
-float wtank_minvol = 1;
+float wtank_minvol = 1.5;
 
 //Temp&Hum sensor variable initializing
 long humidity;
@@ -45,7 +45,7 @@ void setup()
   pinMode(PUMPRELE, OUTPUT);
   digitalWrite(SOILRELE, HIGH);
   digitalWrite(PUMPRELE, HIGH);
-  
+
   //Serial.begin(9600);
   dht.begin();
   // Print temperature sensor details.
@@ -65,8 +65,7 @@ void measWaterLevel()
   wtank_distance = sr04.Distance();
 
   //Transform distance to remaining litres
-  wtank_volume = wtank_maxvolume - (PI * wtank_radius * wtank_radius * wtank_distance);
-
+  wtank_volume = wtank_maxvolume - (PI * wtank_radius * wtank_radius * wtank_distance/100)*1000;
 }
 
 void measTempHumid()
@@ -115,10 +114,10 @@ void lcdUpdate()
 
   lcd.setCursor(0, 1);
   lcd.print("V=");
-  lcd.print(wtank_distance);
+  lcd.print(wtank_volume);
   lcd.print("L");
 
-  lcd.print("  S=");
+  lcd.print(" S=");
   lcd.print(soilmoisturelevel);
   lcd.print("%");
 }
@@ -128,7 +127,7 @@ void measSoilMoisture()
   digitalWrite(SOILRELE, LOW);
   delay(200);
   soilmoisturelevel = analogRead(SOILSENSOR);
-  soilmoisturelevel = abs(((((soilmoisturelevel-112)/850))-1)*100);
+  soilmoisturelevel = abs(((((soilmoisturelevel - 112) / 850)) - 1) * 100);
   digitalWrite(SOILRELE, HIGH);
 }
 
@@ -139,25 +138,29 @@ void loop()
   measTempHumid();
   measSoilMoisture();
 
-  //If soil is wet
-  if (soilmoisturelevel >= drysoillimit)
+  //First of all, check if water is available to avoid breaking the pump.
+  if (wtank_volume > wtank_minvol)
   {
-    //Switch off water pump
-    digitalWrite(PUMPRELE, HIGH);
-    //Set timer to long period between measurements
-    timer = long_timer;
-  }
-
-  //If soil is dry
-  else if (soilmoisturelevel < drysoillimit)
-  { 
-    //Check if water is available in tank before activating pump
-    if (wtank_volume > wtank_minvol)
+    //If soil is wet
+    if (soilmoisturelevel >= drysoillimit)
     {
-      //Switch on water pump
-      digitalWrite(PUMPRELE, LOW);
-      //Set timer to short period between measurements
-      timer = short_timer;
+      //Switch off water pump
+      digitalWrite(PUMPRELE, HIGH);
+      //Set timer to long period between measurements
+      timer = long_timer;
+    }
+
+    //If soil is dry
+    else if (soilmoisturelevel < drysoillimit)
+    {
+      //Check if water is available in tank before activating pump
+      if (wtank_volume > wtank_minvol)
+      {
+        //Switch on water pump
+        digitalWrite(PUMPRELE, LOW);
+        //Set timer to short period between measurements
+        timer = short_timer;
+      }
     }
   }
 
