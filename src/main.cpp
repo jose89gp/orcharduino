@@ -16,7 +16,7 @@
 //Variable timer depending on dry level
 int long_timer = 60*30;
 int short_timer = 2;
-int timer = 2;
+int timer = long_timer;
 
 //Distance sensor variable initializing
 SR04 sr04 = SR04(ECHO_PIN, TRIG_PIN);
@@ -30,6 +30,8 @@ float wtank_minvol = 1.5;
 //Temp&Hum sensor variable initializing
 long humidity;
 long temperature;
+long temp_limit =23;
+long temp_prev;
 DHT_Unified dht(DHTPIN, DHTTYPE);
 
 // LCD variable initializing
@@ -139,7 +141,7 @@ void loop()
   measSoilMoisture();
 
   //First of all, check if water is available to avoid breaking the pump.
-  if (wtank_volume > wtank_minvol)
+  if (wtank_volume > wtank_minvol && temperature < temp_limit)
   {
     //If soil is wet
     if (soilmoisturelevel >= drysoillimit)
